@@ -7,10 +7,12 @@ import {
   setOrderStatus,
   updatePizzaPrices,
 } from "@/lib/admin-data";
+import { requirePermission } from "@/lib/auth";
 import { pizzaExists } from "@/lib/data";
 import { shouldFail, simulateLatency } from "@/lib/demo";
 import { parsePrice } from "@/lib/format";
-import { canTransition, isOrderStatus, STATUS_LABELS } from "@/lib/orders";
+import { canTransition, STATUS_LABELS } from "@/lib/orders";
+import { orderStatusInput } from "@/lib/schemas";
 import type { PizzaSize } from "@/lib/types";
 
 const SIZES: PizzaSize[] = ["S", "M", "L"];
@@ -71,13 +73,21 @@ export async function updateOrderStatusAction(
   _prev: StatusFormState,
   formData: FormData,
 ): Promise<StatusFormState> {
-  const orderId = Number(formData.get("orderId"));
-  const next = formData.get("status");
-  if (!Number.isInteger(orderId) || !isOrderStatus(next)) {
+  // 1. Who are you, and may you do this? A Server Action is a public
+  //    endpoint: anyone can POST to it, with or without our buttons.
+  await requirePermission("orders:update");
+
+  // 2. Is the input well-formed?
+  const parsed = orderStatusInput.safeParse({
+    orderId: formData.get("orderId"),
+    status: formData.get("status"),
+  });
+  if (!parsed.success) {
     return { error: "Permintaan tidak valid." };
   }
+  const { orderId, status: next } = parsed.data;
 
-  // The rule lives on the server: the buttons in the browser are only a hint
+  // 3. Is it allowed by the business rules?
   const current = await getOrderStatus(orderId);
   if (current === null) {
     return { error: "Order tidak ditemukan." };

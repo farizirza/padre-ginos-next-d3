@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import SidebarUser from "@/components/admin/SidebarUser";
 import AdminNav, { AdminNavFallback } from "@/components/admin/AdminNav";
 import FailureToggle from "@/components/FailureToggle";
 
@@ -25,7 +26,12 @@ export default function AdminLayout({
         <Suspense fallback={<AdminNavFallback />}>
           <AdminNav />
         </Suspense>
-        <div className="mt-auto flex flex-col gap-3 px-6 py-5 text-sm text-white/70">
+        <div className="mt-auto">
+          <Suspense fallback={null}>
+            <SidebarUser />
+          </Suspense>
+        </div>
+        <div className="flex flex-col gap-3 px-6 py-5 text-sm text-white/70">
           <FailureToggle />
           <Link href="/" className="hover:text-white">
             ← Ke toko

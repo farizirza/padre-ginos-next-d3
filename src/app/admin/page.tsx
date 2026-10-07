@@ -23,8 +23,11 @@ export default function AdminHome() {
           </Suspense>
         </WidgetErrorBoundary>
 
-        {/* Cached: the slow all-time aggregate is computed once, not per visit */}
-        <TopPizzasWidget />
+        {/* The aggregate is still cached, but WHO is asking is request data:
+            the permission check runs per request, so it streams now */}
+        <Suspense fallback={<WidgetSkeleton title="Terlaris sepanjang masa" />}>
+          <TopPizzasWidget />
+        </Suspense>
       </div>
     </section>
   );

@@ -1,5 +1,7 @@
 import "server-only";
+import { forbidden, unauthorized } from "next/navigation";
 import { cache } from "react";
+import { can, type Permission } from "./permissions";
 import { getSession } from "./session";
 import { findUserById } from "./users";
 import type { User } from "./types";
@@ -15,4 +17,13 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
 
 export function isDevLoginEnabled(): boolean {
   return process.env.AUTH_DEV_LOGIN === "1";
+}
+
+// The guard every protected read and every protected Server Action calls.
+// Not signed in → 401 (unauthorized.tsx). Signed in, wrong role → 403 (forbidden.tsx).
+export async function requirePermission(permission: Permission): Promise<User> {
+  const user = await getCurrentUser();
+  if (!user) unauthorized();
+  if (!can(user, permission)) forbidden();
+  return user;
 }
