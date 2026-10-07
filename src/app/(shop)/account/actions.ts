@@ -2,6 +2,7 @@
 
 import { refresh } from "next/cache";
 import { requireUser } from "@/lib/auth";
+import { shouldFail, simulateLatency } from "@/lib/demo";
 import { profileSchema } from "@/lib/schemas";
 import type { Profile } from "@/lib/types";
 import { updateProfile } from "@/lib/users";
@@ -19,8 +20,10 @@ export async function updateProfileAction(
   _prev: ProfileFormState,
   formData: FormData,
 ): Promise<ProfileFormState> {
+  // 1. Who are you? Bind mutation to the authenticated session user
   const user = await requireUser();
 
+  // 2. Validate input using schema
   const values: Record<Field, string> = {
     name: String(formData.get("name") ?? ""),
     phone: String(formData.get("phone") ?? ""),
@@ -42,6 +45,12 @@ export async function updateProfileAction(
     };
   }
 
+  await simulateLatency("write");
+  if (await shouldFail()) {
+    return { ok: false, errors: { form: "Gagal menyimpan. Coba lagi." }, values };
+  }
+
+  // 3. Strictly save only validated profile fields for the authenticated user
   await updateProfile(user.id, parsed.data);
   refresh();
 
