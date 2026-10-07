@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getFavoriteIds } from "@/lib/data";
+import UserMenu, { UserMenuFallback } from "./UserMenu";
 
 function CountPill({ children }: { children: React.ReactNode }) {
   return (
@@ -26,9 +27,15 @@ export default function Header() {
         <Link href="/" className="text-2xl font-black tracking-tight">
           Padre Gino&apos;s
         </Link>
-        <Suspense fallback={<CountPill>…</CountPill>}>
-          <FavoriteCount />
-        </Suspense>
+        <div className="flex items-center gap-4">
+          <Suspense fallback={<CountPill>…</CountPill>}>
+            <FavoriteCount />
+          </Suspense>
+          {/* Who is signed in is request data: its own boundary */}
+          <Suspense fallback={<UserMenuFallback />}>
+            <UserMenu />
+          </Suspense>
+        </div>
       </nav>
     </header>
   );
