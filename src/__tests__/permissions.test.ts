@@ -12,6 +12,11 @@ describe("can", () => {
     expect(can({ role: "customer" }, "orders:update")).toBe(false);
   });
 
+  it("staff cannot manage products, admins can", () => {
+    expect(can({ role: "staff" }, "products:manage")).toBe(false);
+    expect(can({ role: "admin" }, "products:manage")).toBe(true);
+  });
+
   it("staff and admins can update orders", () => {
     expect(can({ role: "staff" }, "orders:update")).toBe(true);
     expect(can({ role: "admin" }, "orders:update")).toBe(true);

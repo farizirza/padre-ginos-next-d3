@@ -44,6 +44,7 @@ export interface OrderDetail extends Omit<OrderSummary, "items"> {
 }
 
 export async function getProductRows(): Promise<ProductRow[]> {
+  await requirePermission("products:manage");
   await simulateLatency("read");
   await failReadIfSimulated();
   const [types, prices, sales] = await Promise.all([
@@ -226,6 +227,7 @@ export async function getStatusCounts(): Promise<Record<OrderStatus, number>> {
 export async function getSalesBySize(
   id: string,
 ): Promise<{ size: PizzaSize; sold: number }[]> {
+  await requirePermission("products:manage");
   await simulateLatency("read");
   await failReadIfSimulated();
   return all(

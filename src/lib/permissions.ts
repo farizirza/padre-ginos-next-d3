@@ -5,6 +5,7 @@ import type { Role, User } from "./types";
 export const PERMISSIONS = {
   "admin:view": ["staff", "admin"],
   "orders:update": ["staff", "admin"],
+  "products:manage": ["admin"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;
